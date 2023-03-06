@@ -1,0 +1,89 @@
+CREATE VIEW v_01 AS
+SELECT a.nis, a.nama, a.kelas, b.biaya, b.uang_kegiatan, b.ekstrakurikuler AS ekstrakurikuler FROM tbl_siswa a
+INNER JOIN tbl_tentukan_biaya b
+ON a.thn_ajar=b.thn_ajar AND a.kelas=b.kelas
+
+CREATE VIEW v_02 AS
+SELECT a.nis, a.nama, a.kelas, b.paket_buku, b.biaya, b.id AS id_buku
+FROM tbl_siswa a
+INNER JOIN tbl_lihat_buku b
+ON b.thn_ajar=a.thn_ajar AND
+	b.kelas=a.kelas
+
+
+CREATE VIEW v_03 AS
+SELECT
+a.id, a.nis, a.tgl_bayar, 
+b.paket_buku, b.biaya FROM tbl_pesan_buku a 
+INNER JOIN tbl_lihat_buku b 
+ON b.id=a.id_buku
+
+
+(UBAHAN v_03 dengan menambahkan nama dan kelas dari tbl_siswa)
+
+CREATE VIEW v_03 AS
+SELECT a.id, a.nis, c.nama, c.kelas, a.tgl_bayar, b.paket_buku, b.biaya FROM tbl_pesan_buku a 
+INNER JOIN tbl_lihat_buku b 
+ON b.id=a.id_buku
+INNER JOIN tbl_siswa c
+ON a.nis=c.nis
+
+
+agar nis dan tanggal bayar tidak bisa diinput yang sama, maka diperlukan code SQL sebagai berikut:
+CREATE UNIQUE INDEX nis_tgl_bayar ON tbl_lihat_pembayaran (nis, tgl_bayar);
+
+
+(UBAHAN DI SELECT YANG ADA DI edit_pembayaran.php)
+
+/* yang ini tidak terpakai
+SELECT * FROM tbl_pesan_buku WHERE id='$id'
+
+SELECT b.nis, a.nama, b.paket_buku, b.biaya, a.id_buku, b.tgl_bayar FROM v_02 a 
+INNER JOIN v_03 b
+ON a.nis=b.nis
+WHERE b.id='$id'
+*/
+
+(UBAHAN DI SELECT YANG ADA DI lihat_pembayaran_buku.php setelah v_03 diubah dengan menambahkan nama dari tbl_siswa)
+
+SELECT * FROM v_03 WHERE id='$id'
+
+SELECT a.id, b.nama, a.nis, a.paket_buku, a.biaya, DATE_FORMAT(tgl_bayar, '%d/%m/%Y') as tgl_bayar_saja FROM v_03
+
+(UPDATE TERBARU V_03 -> Menambahkan thn_ajar dari tbl_lihat_buku)
+CREATE VIEW v_03 AS
+SELECT a.id, a.nis, c.nama, c.kelas, a.tgl_bayar, b.paket_buku, b.thn_ajar, b.biaya FROM tbl_pesan_buku a 
+INNER JOIN tbl_lihat_buku b 
+ON b.id=a.id_buku
+INNER JOIN tbl_siswa c
+ON a.nis=c.nis
+
+
+CREATE VIEW v_04 AS
+SELECT
+a.id, a.nis, a.id_seragam, a.tgl_bayar, a.jumlah,
+b.nama, b.thn_ajar, b.kelas,
+c.tingkat, c.jns_pakaian, c.ukuran, c.harga
+FROM tbl_pesan_seragam a
+INNER JOIN tbl_siswa b
+ON a.nis=b.nis
+INNER JOIN tbl_lihat_seragam c
+ON a.id_seragam=c.id
+
+CREATE VIEW view_daftarsiswa AS
+SELECT 
+a.nis, a.nama, a.kelas, a.biaya AS uang_sekolah, 
+a.uang_kegiatan, a.ekstrakurikuler, a.total_bayar, a.bln_bayar, a.tgl_bayar 
+FROM `tbl_lihat_pembayaran` a;
+
+CREATE VIEW view_daftarsiswa AS
+SELECT 
+a.nis, a.nama, a.kelas, a.biaya AS uang_sekolah, 
+a.uang_kegiatan, a.ekstrakurikuler, a.total_bayar, a.bln_bayar, a.tgl_bayar, b.tipe 
+FROM `tbl_lihat_pembayaran` a
+INNER JOIN `tbl_tipe_kelas` b
+ON a.kelas=b.kelas
+;
+
+CREATE VIEW view_daftarnama AS
+SELECT a.nis, a.nama, a.thn_ajar, a.kelas FROM tbl_siswa a
